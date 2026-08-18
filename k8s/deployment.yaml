@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: temur-portfolio
+  labels:
+    app: temur-portfolio
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: temur-portfolio
+  template:
+    metadata:
+      labels:
+        app: temur-portfolio
+    spec:
+      containers:
+        - name: temur-portfolio
+          # Replace with your built/pushed image, e.g.:
+          # ghcr.io/<your-username>/temur-portfolio:latest
+          image: temur-portfolio:local
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+              name: http
+          resources:
+            requests:
+              cpu: '50m'
+              memory: '64Mi'
+            limits:
+              cpu: '200m'
+              memory: '128Mi'
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 3
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 20
