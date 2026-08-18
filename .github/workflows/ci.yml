@@ -48,10 +48,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Convert repository owner to lowercase
+        id: repo_owner
+        run: echo "owner=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      # Build the image on every push/PR to catch Dockerfile regressions.
       - name: Build image
         uses: docker/build-push-action@v6
         with:
@@ -59,9 +62,6 @@ jobs:
           push: false
           tags: temur-portfolio:ci
 
-      # Only push to GitHub Container Registry from main. Uses the
-      # automatically-provided GITHUB_TOKEN — no manually created secret
-      # needed.
       - name: Log in to GHCR
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         uses: docker/login-action@v3
@@ -77,5 +77,5 @@ jobs:
           context: .
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/temur-portfolio:latest
-            ghcr.io/${{ github.repository_owner }}/temur-portfolio:${{ github.sha }}
+            ghcr.io/${{ steps.repo_owner.outputs.owner }}/temur-portfolio:latest
+            ghcr.io/${{ steps.repo_owner.outputs.owner }}/temur-portfolio:${{ github.sha }}
